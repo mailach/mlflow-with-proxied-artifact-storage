@@ -1,21 +1,22 @@
 version: "3.3"
 services:
+
   db:
-    image: mysql/mysql-server:5.7.28
-    restart: unless-stopped
+    env_file:
+      - .env
     container_name: mlflow_db
-    expose:
-      - "3306"
-    environment:
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    image: postgres
     volumes:
-      - db_volume:/var/lib/mysql
+      - db_volume:/var/lib/postgresql/data
+    restart: always
+    expose:
+      - "5432"
     networks:
-      - internal
+      - mlflow_internal
+
   mlflow:
+    env_file:
+      - .env
     container_name: tracker_mlflow
     image: tracker_ml
     restart: unless-stopped
@@ -26,14 +27,16 @@ services:
       - "5000:5000"
     volumes:
       - ./mlartifacts:/mlartifacts
-
     networks:
-      - public
-      - internal
-    entrypoint: bash ./wait-for-it.sh db:3306 -t 90 -- mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE} --artifacts-destination /mlartifacts --serve-artifacts -h 0.0.0.0
+      - mlflow_public
+      - mlflow_internal
+    entrypoint: bash ./wait-for-it.sh db:5432 -t 90 -- mlflow server --backend-store-uri postgresql//${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB} --artifacts-destination /mlartifacts --serve-artifacts -h 0.0.0.0
+
 networks:
-  internal:
-  public:
+  mlflow_internal:
+  mlflow_public:
     driver: bridge
+
 volumes:
   db_volume:
+

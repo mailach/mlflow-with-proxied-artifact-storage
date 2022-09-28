@@ -1,6 +1,7 @@
 FROM continuumio/miniconda3:latest
 
-RUN pip install mlflow  pymysql
+RUN pip install mlflow 
+RUN conda install psycopg2
 RUN mkdir /mlartifacts
 
 ADD . /app
