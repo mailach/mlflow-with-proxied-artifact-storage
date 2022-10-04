@@ -1,6 +1,5 @@
 version: "3.3"
 services:
-
   db:
     env_file:
       - .env
@@ -30,7 +29,7 @@ services:
     networks:
       - mlflow_public
       - mlflow_internal
-    entrypoint: bash ./wait-for-it.sh db:5432 -t 90 -- mlflow server --backend-store-uri postgresql//${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB} --artifacts-destination /mlartifacts --serve-artifacts -h 0.0.0.0
+    entrypoint: bash ./wait-for-it.sh db:5432 -t 90 -- mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB} --artifacts-destination /mlartifacts --serve-artifacts -h 0.0.0.0
 
 networks:
   mlflow_internal:
@@ -39,4 +38,3 @@ networks:
 
 volumes:
   db_volume:
-
